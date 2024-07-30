@@ -1,0 +1,110 @@
+#include <Servo.h>
+Servo s;
+int servopin = 2;
+int Mt11 = 4;
+int Mt12 = 3;
+int Mt21 = A1;
+int Mt22 = A2;
+int trigpin = 6;
+int echopin = 5;
+int triglow = 2;
+int trighigh = 10;
+int choice = 1;
+int wait = 1000;
+float time;
+float dleft;
+float dright;
+float obstacle;
+
+void forward(){
+  digitalWrite(Mt11,HIGH);
+  digitalWrite(Mt12,LOW); 
+  digitalWrite(Mt21,HIGH);  
+  digitalWrite(Mt22,LOW);
+}
+
+void backward(){
+  digitalWrite(Mt11,LOW);
+  digitalWrite(Mt12,HIGH); 
+  digitalWrite(Mt21,LOW);  
+  digitalWrite(Mt22,HIGH);
+}
+
+void right(){
+  digitalWrite(Mt11,HIGH);
+  digitalWrite(Mt12,LOW); 
+  digitalWrite(Mt21,LOW);  
+  digitalWrite(Mt22,LOW);
+}
+
+void left(){
+  digitalWrite(Mt11,LOW);
+  digitalWrite(Mt12,LOW); 
+  digitalWrite(Mt21,HIGH);  
+  digitalWrite(Mt22,LOW);
+}
+
+void stop(){
+  digitalWrite(Mt11,LOW);
+  digitalWrite(Mt12,LOW); 
+  digitalWrite(Mt21,LOW);  
+  digitalWrite(Mt22,LOW);
+}
+
+float duration(){
+  digitalWrite(trigpin,LOW);
+  delay(triglow);
+  digitalWrite(trigpin,HIGH);
+  delay(trighigh);
+  digitalWrite(trigpin,LOW);
+  return pulseIn(echopin,HIGH)/2.00;
+}
+
+float distance(){
+  time = duration();
+  return time*0.034;
+}
+  
+void setup(){
+  pinMode(Mt11,OUTPUT);
+  pinMode(Mt12,OUTPUT);
+  pinMode(Mt21,OUTPUT);
+  pinMode(Mt22,OUTPUT);
+  pinMode(trigpin,OUTPUT);
+  pinMode(echopin,INPUT);
+  s.attach(servopin);
+  s.write(90);
+  Serial.begin(9600);
+}
+
+void loop(){
+  obstacle = distance();
+  Serial.println(obstacle);
+  if(obstacle <= 50){
+    stop();
+    delay(wait);
+    s.write(25);
+    dright = distance();
+    delay(wait);
+    s.write(155);
+    dleft = distance();
+    delay(wait);
+    s.write(90);
+    delay(wait);
+    if(dleft > dright){
+      left();
+      delay(wait);
+    }
+    else if(dleft < dright){
+      right();
+      delay(wait);
+    }
+    else if(dleft == dright){
+      backward();
+      delay(wait*2);
+    }
+  }
+  else{
+    forward();
+  }
+}
